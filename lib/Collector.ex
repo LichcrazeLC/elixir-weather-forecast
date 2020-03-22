@@ -1,31 +1,41 @@
 defmodule WF.Collector do
-  use Agent, restart: :temporary
+  use GenServer, restart: :permanent
 
-  @doc """
-  Starts a new bucket.
-  """
-  def start_link(_opts) do
-    Agent.start_link(fn -> %{} end)
+  def start_link(opts) do
+    GenServer.start_link(__MODULE__, %{}, opts)
   end
 
-  @doc """
-  Gets a value from the `bucket` by `key`.
-  """
-  def get(bucket, key) do
-    Agent.get(bucket, &Map.get(&1, key))
+  @impl true
+  def init(_state) do
+
+    {:ok, pid} = DynamicSupervisor.start_child(WF.ParserSupervisor, WF.EventParser)
+    resp = HTTPoison.get! "http://localhost:4000/iot", %{}, stream_to: pid, async: :once
+    Process.send_after(self(), resp, 1_000)
+    {:ok, %{last_run_at: nil}}
+
   end
 
-  @doc """
-  Puts the `value` for the given `key` in the `bucket`.
-  """
-  def put(bucket, key, value) do
-    Agent.update(bucket, &Map.put(&1, key, value))
+  @impl true
+  def handle_info(resp, state) do
+
+    case resp do
+      :kill -> {:stop, :normal, state}
+          _ -> ":ok"
+    end
+
+    send_event_chunk(resp)
+
+    case Supervisor.which_children(WF.ParserSupervisor) do
+      [] -> Process.send(self(), :kill, [])
+       _ -> Process.send_after(self(), resp, 1_000)
+    end
+
+    {:noreply, %{last_run_at: :calendar.local_time()}}
+
   end
 
-  def delete(bucket, key) do
-    Agent.get_and_update(bucket, fn dict ->
-      Map.pop(dict, key)
-    end)
+  defp send_event_chunk(resp) do
+    HTTPoison.stream_next(resp)
   end
 
 end
