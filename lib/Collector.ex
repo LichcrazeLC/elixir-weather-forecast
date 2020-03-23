@@ -8,7 +8,7 @@ defmodule WF.Collector do
   @impl true
   def init(_state) do
 
-    {:ok, pid} = DynamicSupervisor.start_child(WF.ParserSupervisor, WF.EventParser)
+    {:ok, pid} = DynamicSupervisor.start_child(WF.ParserSupervisor, WF.Parser)
     resp = HTTPoison.get! "http://localhost:4000/iot", %{}, stream_to: pid, async: :once
     Process.send_after(self(), resp, 1_000)
     {:ok, %{last_run_at: nil}}

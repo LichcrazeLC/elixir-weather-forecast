@@ -10,7 +10,10 @@ defmodule WF.Supervisor do
 
     children = [
       {DynamicSupervisor, name: WF.ParserSupervisor, strategy: :one_for_one},
-      {Task.Supervisor, name: WF.TaskSupervisor, strategy: :one_for_one},
+      {WF.Computer, name: WF.Computer},
+      {DynamicSupervisor, name: WF.ForecasterSupervisor, strategy: :one_for_one},
+      {WF.Aggregator, name: WF.Aggregator},
+      {WF.ForecasterRegistry, name: WF.ForecasterRegistry},
       WF.Collector
     ]
 

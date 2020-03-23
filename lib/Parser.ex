@@ -1,4 +1,4 @@
-defmodule WF.EventParser do
+defmodule WF.Parser do
   use GenServer, restart: :temporary
 
   def start_link(opts) do
@@ -6,23 +6,24 @@ defmodule WF.EventParser do
   end
 
   @impl true
-  def init(state) do
-    {:ok, state}
+  def init(computer) do
+    {:ok, computer} = {:ok, WF.Computer}
   end
 
   @impl true
-  def handle_info(msg, state) do
+  def handle_info(msg, computer) do
 
     case msg do
       %HTTPoison.AsyncChunk{chunk: c} ->
         data = String.slice(Enum.at(String.split(c, "\n"), 2), 6..-1)
         respJson = Jason.decode!(data)
-        IO.inspect respJson["message"]
+        GenServer.cast(computer, {:process, respJson["message"]})
+        # IO.inspect respJson["message"]
       _ ->
-        IO.puts "something else received"
+        IO.puts "-- Request Parameters Received --"
     end
 
-    {:noreply, state}
+    {:noreply, computer}
 
   end
 
