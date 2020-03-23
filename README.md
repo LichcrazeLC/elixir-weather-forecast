@@ -1,4 +1,4 @@
-# Theatre
+# Weather Forecaster
 
 **TODO: Add description**
 
@@ -10,7 +10,7 @@ by adding `theatre` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:theatre, "~> 0.1.0"}
+    {:wf, "~> 0.1.0"}
   ]
 end
 ```
