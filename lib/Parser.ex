@@ -7,7 +7,7 @@ defmodule WF.Parser do
 
   @impl true
   def init(computer) do
-    {:ok, computer} = {:ok, WF.Computer}
+    {:ok, computer}
   end
 
   @impl true
@@ -17,8 +17,7 @@ defmodule WF.Parser do
       %HTTPoison.AsyncChunk{chunk: c} ->
         data = String.slice(Enum.at(String.split(c, "\n"), 2), 6..-1)
         respJson = Jason.decode!(data)
-        GenServer.cast(computer, {:process, respJson["message"]})
-        # IO.inspect respJson["message"]
+        GenServer.cast(WF.Computer, {:process, respJson["message"]})
       _ ->
         IO.puts "-- Request Parameters Received --"
     end

@@ -13,7 +13,7 @@ defmodule WF.LForecaster do
   @impl true
   def handle_cast({:Forecast, paramList}, aggregator) do
 
-    IO.inspect paramList, label: "--- TF Data Received"
+    IO.inspect paramList, label: "--- LF Data Received"
 
     cond do
       paramList.light < 128 ->

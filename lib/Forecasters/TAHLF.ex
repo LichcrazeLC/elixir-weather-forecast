@@ -13,7 +13,7 @@ defmodule WF.TAHLForecaster do
   @impl true
   def handle_cast({:Forecast, paramList}, aggregator) do
 
-    IO.inspect paramList, label: "--- TLAF Data Received"
+    IO.inspect paramList, label: "--- TAHLF Data Received"
 
     cond do
       paramList.temp > 30 and paramList.hum > 80 and paramList.atm < 770 and paramList.light > 192 ->
